@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Footprint Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Styling */
+        body {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;  /* Prevents extra space */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Navigation Menu */
+        .nav {
+            background: #ff4f8b;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .nav a:hover {
+            color: #fad0c4;
+        }
+
+        /* Header Styling */
+        .header {
+            background: rgba(255, 79, 139, 0.9);
+            color: white;
+            padding: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        /* Main Content Box */
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        h2 {
+            color: #ff4f8b;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        input, select {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #ffb6c1;
+            border-radius: 12px;
+            outline: none;
+            font-size: 16px;
+        }
+
+        button {
+            background: #ff4f8b;
+            color: white;
+            padding: 12px;
+            border: none;
+            width: 90%;
+            border-radius: 12px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #ff85a2;
+        }
+
+        /* Chart Section */
+        .chart-container {
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            min-height: 300px; /* Prevents bottom space */
+        }
+
+        canvas {
+            max-width: 100%;
+            height: 250px !important;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Menu -->
+    <div class="nav">
+        <a href="file:///C:/Users/JENNIFER/Documents/Internship/Hackathon/Login.html">Login</a>
+        <a href="file:///C:/Users/JENNIFER/Documents/Internship/Hackathon/Signup.html">Signup</a>
+        <a href="file:///C:/Users/JENNIFER/Documents/Internship/Hackathon/CF_Tracker.html">Home</a>
+        <a href="file:///C:/Users/JENNIFER/Documents/Internship/Hackathon/Reduce_Carbon_Footprint.html">Suggestions</a>
+        <a href="file:///C:/Users/JENNIFER/Documents/Internship/Hackathon/Contact_us.html">Contact</a>
+    </div>
+
+    <!-- Header Section -->
+    <div class="header">🌍 Carbon Footprint Tracker</div>
+
+    <!-- Input Form Section -->
+    <div class="container">
+        <label for="month">Select Month:</label>
+        <select id="month">
+            <option value="January">January</option>
+            <option value="February">February</option>
+            <option value="March">March</option>
+            <option value="April">April</option>
+            <option value="May">May</option>
+            <option value="June">June</option>
+            <option value="July">July</option>
+            <option value="August">August</option>
+            <option value="September">September</option>
+            <option value="October">October</option>
+            <option value="November">November</option>
+            <option value="December">December</option>
+        </select>
+
+        <label>Electricity Used (kWh):</label>
+        <input type="number" id="electricity" placeholder="Enter kWh" required>
+
+        <label>Vehicle Distance (km):</label>
+        <input type="number" id="vehicle" placeholder="Enter km traveled" required>
+
+        <label>Meat/Dairy Consumption (kg):</label>
+        <input type="number" id="food" placeholder="Enter kg of meat/dairy" required>
+
+        <button onclick="calculateCarbon()">Calculate Carbon Footprint</button>
+    </div>
+
+    <!-- Chart Display Section -->
+    <div class="chart-container">
+        <canvas id="chart"></canvas>
+    </div>
+
+    <script>
+        function calculateCarbon() {
+            let month = document.getElementById("month").value;
+            let electricity = parseFloat(document.getElementById("electricity").value) || 0;
+            let vehicle = parseFloat(document.getElementById("vehicle").value) || 0;
+            let food = parseFloat(document.getElementById("food").value) || 0;
+
+            // Carbon footprint calculation factors (kg CO₂ per unit)
+            let elecFactor = 0.92;  // kg CO₂ per kWh
+            let vehicleFactor = 0.271;  // kg CO₂ per km
+            let foodFactor = 27;  // kg CO₂ per kg of meat/dairy
+
+            // Total carbon footprint calculation
+            let carbonFootprint = (electricity * elecFactor) + (vehicle * vehicleFactor) + (food * foodFactor);
+            
+            // Save to localStorage (simulating backend storage)
+            let storedData = JSON.parse(localStorage.getItem("carbonData")) || {};
+            storedData[month] = carbonFootprint;
+            localStorage.setItem("carbonData", JSON.stringify(storedData));
+
+            alert(`Your carbon footprint for ${month} is ${carbonFootprint.toFixed(2)} kg CO₂ 🌿`);
+
+            showChart(storedData);
+        }
+
+        function showChart(data) {
+            let ctx = document.getElementById('chart').getContext('2d');
+            let months = Object.keys(data);
+            let values = Object.values(data);
+
+            if (window.carbonChart) {
+                window.carbonChart.destroy();
+            }
+
+            window.carbonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Carbon Footprint (kg CO₂)',
+                        data: values,
+                        backgroundColor: '#ff4f8b',
+                        borderColor: '#ff85a2',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,  
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
